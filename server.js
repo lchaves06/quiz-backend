@@ -133,6 +133,19 @@ const server = http.createServer(async (req, res) => {
       return enviarJSON(res, 200, data);
     }
 
+    // ----------------------------------------------------
+    // GET /api/icons -> Retorna todos os ícones cadastrados
+    // ----------------------------------------------------
+    if (req.method === 'GET' && pathname === '/api/icons') {
+      const { data, error } = await supabase
+        .from('icons')
+        .select('*')
+        .order('icon_id', { ascending: true });
+
+      if (error) throw error;
+      return enviarJSON(res, 200, data);
+    }
+
     // Rota não encontrada
     return enviarJSON(res, 404, { erro: 'Rota não encontrada.' });
 
