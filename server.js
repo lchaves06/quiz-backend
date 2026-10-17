@@ -55,7 +55,7 @@ const server = http.createServer(async (req, res) => {
     // GET /api/questions -> Retorna todas as perguntas com alternativas
     // ----------------------------------------------------
     if (req.method === 'GET' && pathname === '/api/questions') {
-      const { data, error } = await supabase.from('perguntas').select('*, alternativas(*)');
+      const { data, error } = await supabase.from('perguntas').select('*, alternativas!pergunta_id(*)');
       if (error) throw error;
       return enviarJSON(res, 200, data);
     }
@@ -64,17 +64,15 @@ const server = http.createServer(async (req, res) => {
     // GET /api/questions/random -> Retorna 10 perguntas aleatórias para a partida
     // ----------------------------------------------------
     if (req.method === 'GET' && pathname === '/api/questions/random') {
-      // Busca todas e embaralha no código (ou usa lógica SQL do Supabase)
-      const { data, error } = await supabase.from('perguntas').select('*, alternativas(*)');
+      const { data, error } = await supabase.from('perguntas').select('*, alternativas!pergunta_id(*)');
       if (error) throw error;
       
-      // Embaralha aleatoriamente e pega no máximo 10
       const embaralhadas = data.sort(() => 0.5 - Math.random()).slice(0, 10);
       return enviarJSON(res, 200, embaralhadas);
     }
 
     // ----------------------------------------------------
-    // POST /api/users -> Cadastra o usuário (nome e icone_id)
+    // POST /api/users -> Cadastra o usuário e retorna padronizado
     // ----------------------------------------------------
     if (req.method === 'POST' && pathname === '/api/users') {
       const body = await lerBody(req);
@@ -89,7 +87,14 @@ const server = http.createServer(async (req, res) => {
         .single();
 
       if (error) throw error;
-      return enviarJSON(res, 201, data);
+
+      // Traduz o 'id_usuario' do banco para 'id' para o front-end ler sem falhas
+      return enviarJSON(res, 201, {
+        id: data.id_usuario,
+        nome: data.nome,
+        icone_id: data.icone_id,
+        criado_em: data.criado_em
+      });
     }
 
     // ----------------------------------------------------
