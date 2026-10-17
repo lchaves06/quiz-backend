@@ -118,7 +118,7 @@ const server = http.createServer(async (req, res) => {
       const { data, error } = await supabase
         .from('partidas')
         .select(`
-          id,
+          id_partida,
           pontuacao_total,
           data_partida,
           usuarios (
